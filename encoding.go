@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 )
 
@@ -83,9 +84,25 @@ func (e encoder) writeSource(buf *buffer, pc uintptr, cwd string) {
 		}
 	}
 	e.withColor(buf, e.opts.Theme.Source(), func() {
-		buf.AppendString(frame.File)
-		buf.AppendByte(':')
-		buf.AppendInt(int64(frame.Line))
+		if e.opts.SourceLength > 0 {
+			source := fmt.Sprintf("%s/%s:%d", frame.File, frame.Function, frame.Line)
+			if len(source) > e.opts.SourceLength {
+				charsThatFit := e.opts.SourceLength - 3
+				frontChars := source[:charsThatFit/2]
+				if charsThatFit%2 == 1 {
+					charsThatFit = charsThatFit + 1
+				}
+				rearChars := source[len(source)-charsThatFit/2:]
+				source = frontChars + "..." + rearChars
+			} else {
+				source = source + strings.Repeat(" ", e.opts.SourceLength-len(source))
+			}
+			buf.AppendString(source)
+		} else {
+			buf.AppendString(frame.File)
+			buf.AppendByte(':')
+			buf.AppendInt(int64(frame.Line))
+		}
 	})
 	e.writeColoredString(buf, " > ", e.opts.Theme.AttrKey())
 }

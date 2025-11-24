@@ -33,6 +33,11 @@ type HandlerOptions struct {
 	// Disable colorized output
 	NoColor bool
 
+	// Enforce a fixed length for the source code field. If set, source code references longer than the field value
+	// will be trimmed but retain their starting & ending characters. If the source code is shorter than the set value,
+	// it is padded with spaces.
+	SourceLength int
+
 	// TimeFormat is the format used for time.DateTime
 	TimeFormat string
 
